@@ -16,7 +16,8 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiExcludeEndpoint,
-  ApiBody 
+  ApiBody,
+  ApiSecurity // Add this import
 } from '@nestjs/swagger';
 import { WalletService } from './wallet.service';
 import { AuthGuard } from '../../common/guards/auth.guard';
@@ -31,7 +32,7 @@ import { PaystackService } from '../paystack/paystack.service';
 
 @ApiTags('💰 Wallet')
 @ApiBearerAuth('JWT-auth')
-@ApiBearerAuth('API-Key-auth')
+@ApiSecurity('API-Key') // Changed from @ApiBearerAuth('API-Key-auth')
 @Controller('wallet')
 export class WalletController {
   constructor(
@@ -174,8 +175,8 @@ export class WalletController {
           id: '123e4567-e89b-12d3-a456-426614174000',
           reference: 'TXN_TRANSFER_1733779200',
           amount: '1000.00',
-          type: 'TRANSFER',
-          status: 'SUCCESS',
+          type: 'transfer',
+          status: 'success',
           recipientWalletNumber: '0987654321',
           createdAt: '2024-12-09T12:00:00.000Z'
         }
@@ -228,16 +229,16 @@ export class WalletController {
             id: '123e4567-e89b-12d3-a456-426614174000',
             reference: 'TXN_1733779200',
             amount: '5000.00',
-            type: 'DEPOSIT',
-            status: 'SUCCESS',
+            type: 'deposit',
+            status: 'success',
             createdAt: '2024-12-09T12:00:00.000Z'
           },
           {
             id: '987e6543-e21b-98d7-a654-321098765432',
             reference: 'TXN_TRANSFER_1733779300',
             amount: '1000.00',
-            type: 'TRANSFER',
-            status: 'SUCCESS',
+            type: 'transfer',
+            status: 'success',
             recipientWalletNumber: '0987654321',
             createdAt: '2024-12-09T13:00:00.000Z'
           }
@@ -262,9 +263,9 @@ export class WalletController {
 **Checks the status of a deposit transaction**
 
 ### Possible statuses:
-- **PENDING** - Payment not yet completed
-- **SUCCESS** - Payment successful, wallet credited
-- **FAILED** - Payment failed
+- **pending** - Payment not yet completed
+- **success** - Payment successful, wallet credited
+- **failed** - Payment failed
 
 ### Use cases:
 - Poll for payment completion
@@ -284,7 +285,7 @@ export class WalletController {
     schema: {
       example: {
         reference: 'TXN_1733779200_abc123',
-        status: 'SUCCESS',
+        status: 'success',
         amount: '5000.00',
         createdAt: '2024-12-09T12:00:00.000Z'
       }
