@@ -1,38 +1,26 @@
 // src/app.controller.ts
 import { Controller, Get } from '@nestjs/common';
-import { 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse 
-} from '@nestjs/swagger';
-import { HealthCheckService, TypeOrmHealthIndicator, HealthCheck } from '@nestjs/terminus';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('🏥 Health')
 @Controller()
 export class AppController {
-  constructor(
-    private health: HealthCheckService,
-    private db: TypeOrmHealthIndicator,
-  ) {}
-
   @Get('health')
-  @HealthCheck()
   @ApiOperation({ summary: 'Health check endpoint' })
-  @ApiResponse({ status: 200, description: 'Service is healthy' })
-  @ApiResponse({ status: 503, description: 'Service is unhealthy' })
-  check() {
-    return this.health.check([
-      () => this.db.pingCheck('database'),
-    ]);
+  healthCheck() {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'Wallet Service API',
+      version: '1.0.0',
+    };
   }
 
   @Get()
   @ApiOperation({ summary: 'Root endpoint' })
-  getRoot() {
+  root() {
     return {
-      service: 'Wallet Service API',
-      version: '1.0.0',
-      status: 'running',
+      message: 'Wallet Service API',
       documentation: '/api/docs',
       health: '/health',
     };

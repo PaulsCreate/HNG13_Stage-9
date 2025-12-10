@@ -1,3 +1,4 @@
+// src/config/database.config.ts
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../entities/user.entity';
@@ -8,20 +9,18 @@ import { ApiKey } from '../entities/api-key.entity';
 export const getDatabaseConfig = (
   configService: ConfigService,
 ): TypeOrmModuleOptions => {
-  const isProduction = configService.get('NODE_ENV') === 'production';
-  const entities = [User, Wallet, Transaction, ApiKey];
-
+  // Scalingo provides DATABASE_URL automatically
   const databaseUrl = configService.get('DATABASE_URL');
   
   if (databaseUrl) {
     return {
       type: 'postgres',
       url: databaseUrl,
-      entities,
+      entities: [User, Wallet, Transaction, ApiKey],
       migrations: ['dist/migrations/*{.ts,.js}'],
-      synchronize: false,
-      ssl: isProduction ? { rejectUnauthorized: false } : false,
-      logging: !isProduction,
+      synchronize: false, // NEVER true in production
+      ssl: { rejectUnauthorized: false },
+      logging: false,
       migrationsRun: true,
       extra: {
         max: 10,
@@ -30,6 +29,7 @@ export const getDatabaseConfig = (
     };
   }
 
+  // Fallback for local development
   return {
     type: 'postgres',
     host: configService.get('DATABASE_HOST', 'localhost'),
@@ -37,15 +37,11 @@ export const getDatabaseConfig = (
     username: configService.get('DATABASE_USER'),
     password: configService.get('DATABASE_PASSWORD'),
     database: configService.get('DATABASE_NAME'),
-    entities,
+    entities: [User, Wallet, Transaction, ApiKey],
     migrations: ['dist/migrations/*{.ts,.js}'],
-    synchronize: !isProduction,
+    synchronize: false,
     ssl: false,
     logging: true,
-    migrationsRun: !isProduction,
-    extra: {
-      max: 10,
-      connectionTimeoutMillis: 10000,
-    },
+    migrationsRun: false,
   };
 };

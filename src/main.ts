@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
+    logger: ['error', 'warn', 'log'],
   });
 
   const configService = app.get(ConfigService);
@@ -16,7 +17,7 @@ async function bootstrap() {
     origin: configService.get('FRONTEND_URL') || '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'API-Key'],
   });
 
   // Global validation pipe
