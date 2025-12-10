@@ -17,7 +17,7 @@ async function bootstrap() {
     origin: configService.get('FRONTEND_URL') || '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'API-Key'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'], // Changed from API-Key
   });
 
   // Global validation pipe
@@ -47,19 +47,19 @@ A comprehensive wallet service with Google OAuth authentication, Paystack paymen
 
 ## 🚀 Getting Started
 
-### Step 1: Authenticate
-1. Click on **GET /auth/google** endpoint
-2. Open the URL in your browser
-3. Complete Google OAuth
-4. Copy the JWT token from the response
+### Option 1: Using JWT Token
+1. Visit **GET /auth/google** endpoint in browser
+2. Complete Google OAuth
+3. Copy the JWT token from response
+4. Click **Authorize 🔒** button above
+5. Paste token in **JWT-auth** section
 
-### Step 2: Authorize
-1. Click the **Authorize 🔒** button above
-2. Paste your JWT token
-3. Click "Authorize"
-
-### Step 3: Start Using
-Now you can test all endpoints with your authenticated session!
+### Option 2: Using API Key
+1. First authenticate with JWT (Option 1)
+2. Create API key at **POST /keys/create**
+3. Copy the API key (shows only once!)
+4. Click **Authorize 🔒** button
+5. Paste key in **API-Key** section
 
 ## 📝 API Key Permissions
 
@@ -75,14 +75,22 @@ Use these test cards for deposits:
 - **Expiry:** Any future date
 - **PIN:** 0000
 - **OTP:** 123456
+
+## ⚠️ Important Notes
+
+- API Keys use header: \`x-api-key: sk_live_...\`
+- JWT uses header: \`Authorization: Bearer <token>\`
+- Maximum 5 active API keys per user
+- API keys can be created with specific permissions
     `)
     .setVersion('1.0.0')
     .setContact(
-      'API Support',
-      'https://github.com/yourusername/wallet-service',
-      'support@wallet-service.com'
+      'Paul Iheanyichukwu',
+      'https://github.com/PaulsCreate/HNG13_Stage-9',
+      ''
     )
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
+    // JWT Authentication
     .addBearerAuth(
       {
         type: 'http',
@@ -94,17 +102,13 @@ Use these test cards for deposits:
       },
       'JWT-auth',
     )
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'API Key',
-        name: 'API-Key',
-        description: 'Enter API Key (format: wsk_live_...)',
-        in: 'header',
-      },
-      'API-Key-auth',
-    )
+    // API Key Authentication - FIXED TO USE x-api-key HEADER
+    .addSecurity('API-Key', {
+      type: 'apiKey',
+      in: 'header',
+      name: 'x-api-key',
+      description: 'Enter your API Key (format: sk_live_...)',
+    })
     .addTag('🔐 Authentication', 'Google OAuth 2.0 authentication and JWT token management')
     .addTag('💰 Wallet', 'Wallet operations: deposit, transfer, balance, transactions')
     .addTag('🔑 API Keys', 'Create and manage API keys with custom permissions')
