@@ -85,7 +85,7 @@ Use these test cards for deposits:
     `)
     .setVersion('1.0.0')
     .setContact(
-      'Paul Iheanyichukwu',
+      'Paul Yusuf',
       'https://github.com/PaulsCreate/HNG13_Stage-9',
       ''
     )
