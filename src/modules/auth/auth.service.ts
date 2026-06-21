@@ -1,10 +1,10 @@
+// src/modules/auth/auth.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../entities/user.entity';
 import { Wallet } from '../../entities/wallet.entity';
-import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -45,8 +45,24 @@ export class AuthService {
 
         user = await queryRunner.manager.save(User, user);
 
+        // Generate 10-digit wallet number
+        let walletNumber = this.generateWalletNumber();
+        
+        // Ensure uniqueness (retry if duplicate, though extremely rare)
+        let existingWallet = await queryRunner.manager.findOne(Wallet, {
+          where: { walletNumber }
+        });
+        
+        let attempts = 0;
+        while (existingWallet && attempts < 5) {
+          walletNumber = this.generateWalletNumber();
+          existingWallet = await queryRunner.manager.findOne(Wallet, {
+            where: { walletNumber }
+          });
+          attempts++;
+        }
+
         // Create wallet for new user
-        const walletNumber = this.generateWalletNumber();
         const wallet = queryRunner.manager.create(Wallet, {
           walletNumber,
           userId: user.id,
@@ -71,15 +87,20 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
+      walletId: user.wallet?.id,
     };
 
     return this.jwtService.sign(payload);
   }
 
   private generateWalletNumber(): string {
-    // Generate a 13-digit wallet number
-    const timestamp = Date.now().toString().slice(-10);
-    const random = crypto.randomInt(100, 999).toString();
-    return timestamp + random;
+    // Generate exactly 10-digit wallet number
+    // Range: 1000000000 to 9999999999
+    const min = 1000000000; // Minimum 10-digit number
+    const max = 9999999999; // Maximum 10-digit number
+    
+    // Generate random number in range
+    const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+    return randomNumber.toString();
   }
 }

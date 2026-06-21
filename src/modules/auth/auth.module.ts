@@ -19,7 +19,7 @@ import { Wallet } from '../../entities/wallet.entity';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get('JWT_EXPIRATION') || '7d', // Fixed!
+          expiresIn: configService.get('JWT_EXPIRATION') || '7d',
         },
       }),
       inject: [ConfigService],

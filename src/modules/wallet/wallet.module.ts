@@ -17,5 +17,6 @@ import { PaystackModule } from '../paystack/paystack.module';
   ],
   providers: [WalletService],
   controllers: [WalletController],
+  exports: [WalletService],
 })
 export class WalletModule {}
